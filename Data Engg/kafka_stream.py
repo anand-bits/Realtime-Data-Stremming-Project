@@ -26,7 +26,7 @@ def format_data(res):
     location = res['location']  # Extract location details
 
     # Add formatted data to the dictionary
-    data['id'] = uuid.uuid4()  # Generate a unique UUID for the user
+    data['id'] = str(uuid.uuid4())  # Convert UUID to string
     data['first_name'] = res['name']['first']
     data['last_name'] = res['name']['last']
     data['gender'] = res['gender']
@@ -42,6 +42,7 @@ def format_data(res):
 
     return data  # Return the formatted data
 
+
 # Function to stream data to a Kafka topic
 def stream_data():
     import json
@@ -50,7 +51,8 @@ def stream_data():
     import logging
 
     # Create a Kafka producer
-    producer = KafkaProducer(bootstrap_servers=['broker:29092'], max_block_ms=5000)  # Adjust broker settings as needed
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
+  # Adjust broker settings as needed
     curr_time = time.time()  # Capture the current time
 
     # Continuously stream data for 1 minute
