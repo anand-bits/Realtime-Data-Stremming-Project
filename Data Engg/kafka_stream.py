@@ -77,4 +77,6 @@ def stream_data():
 #     # Define a PythonOperator to execute the stream_data function
 #     streaming_task = PythonOperator(
 #         task_id='stream_data_from_api',  # Unique identifier for this task
-#         python_callable=stream_data  # The functi
+#         python_callable=stream_data  # The function to execute
+#     )
+stream_data();
