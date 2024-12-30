@@ -3,30 +3,24 @@ from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-# Define default arguments for the DAG
 default_args = {
-    'owner': 'airscholar',  # Indicates the owner of this DAG for metadata purposes
-    'start_date': datetime(2023, 9, 3, 10, 00)  # Start date of the DAG; ensure this aligns with your use case
+    'owner': 'airscholar',
+    'start_date': datetime(2023, 9, 3, 10, 00)
 }
 
-# Function to fetch data from the random user API
 def get_data():
     import requests
 
-    # Make an API request
     res = requests.get("https://randomuser.me/api/")
-    res = res.json()  # Parse the JSON response
-    res = res['results'][0]  # Extract the first result from the response
+    res = res.json()
+    res = res['results'][0]
 
-    return res  # Return the result dictionary
+    return res
 
-# Function to format data into a structured format
 def format_data(res):
     data = {}
-    location = res['location']  # Extract location details
-
-    # Add formatted data to the dictionary
-    data['id'] = str(uuid.uuid4())  # Convert UUID to string
+    location = res['location']
+    data['id'] = str(uuid.uuid4())
     data['first_name'] = res['name']['first']
     data['last_name'] = res['name']['last']
     data['gender'] = res['gender']
@@ -40,45 +34,36 @@ def format_data(res):
     data['phone'] = res['phone']
     data['picture'] = res['picture']['medium']
 
-    return data  # Return the formatted data
+    return data
 
-
-# Function to stream data to a Kafka topic
 def stream_data():
     import json
     from kafka import KafkaProducer
     import time
     import logging
 
-    # Create a Kafka producer
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
-  # Adjust broker settings as needed
-    curr_time = time.time()  # Capture the current time
+    curr_time = time.time()
 
-    # Continuously stream data for 1 minute
     while True:
-        # if time.time() > curr_time + 60:  # Stop streaming after 1 minute
-        #     break
+        if time.time() > curr_time + 60: #1 minute
+            break
         try:
-            # Fetch and format data
             res = get_data()
             res = format_data(res)
 
-            # Send data to the Kafka topic
-            producer.send('users_created', json.dumps(res).encode('utf-8'))  # Encode the JSON data
+            producer.send('users_created', json.dumps(res).encode('utf-8'))
         except Exception as e:
-            logging.error(f'An error occurred: {e}')  # Log any errors
+            logging.error(f'An error occured: {e}')
             continue
 
-# # Define the DAG
-# with DAG('user_automation',  # Unique identifier for the DAG
-#          default_args=default_args,  # Use the previously defined default arguments
-#          schedule_interval='@daily',  # Run the DAG daily
-#          catchup=False) as dag:  # Disable backfilling for missed runs
+with DAG('user_automation',
+         default_args=default_args,
+         schedule='@daily',  # Correct usage
+         catchup=False
+) as dag:
 
-#     # Define a PythonOperator to execute the stream_data function
-#     streaming_task = PythonOperator(
-#         task_id='stream_data_from_api',  # Unique identifier for this task
-#         python_callable=stream_data  # The function to execute
-#     )
-stream_data();
+    streaming_task = PythonOperator(
+        task_id='stream_data_from_api',
+        python_callable=stream_data # Pass the function reference, not the result of calling it
+    )
