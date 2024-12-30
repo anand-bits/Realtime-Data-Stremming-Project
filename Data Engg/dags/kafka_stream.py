@@ -36,13 +36,14 @@ def format_data(res):
 
     return data
 
+
 def stream_data():
     import json
     from kafka import KafkaProducer
     import time
     import logging
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
+    producer = KafkaProducer(bootstrap_servers=['broker:29092'], max_block_ms=5000)
     curr_time = time.time()
 
     while True:
@@ -59,11 +60,10 @@ def stream_data():
 
 with DAG('user_automation',
          default_args=default_args,
-         schedule='@daily',  # Correct usage
-         catchup=False
-) as dag:
+         schedule='@daily',
+         catchup=False) as dag:
 
     streaming_task = PythonOperator(
         task_id='stream_data_from_api',
-        python_callable=stream_data # Pass the function reference, not the result of calling it
+        python_callable=stream_data
     )
