@@ -3,10 +3,10 @@ set -e
 
 # Install Python packages from requirements.txt if it exists
 if [ -e "/opt/airflow/requirements.txt" ]; then
-  $(command -v pip) install --user -r /opt/airflow/requirements.txt
+  $(command -v pip) install --no-cache-dir --user -r /opt/airflow/requirements.txt
 fi
 
-# Initialize Airflow DB if not already initialized, and create the admin user
+# Initialize Airflow DB and create admin user if needed
 if [ ! -f "/opt/airflow/airflow.db" ]; then
   airflow db init && \
   airflow users create \
@@ -18,8 +18,8 @@ if [ ! -f "/opt/airflow/airflow.db" ]; then
     --password admin
 fi
 
-# Ensure the DB schema is up-to-date
+# Upgrade Airflow DB schema to the latest version
 $(command -v airflow) db upgrade
 
 # Start the Airflow webserver
-exec airflow webserver
+exec $(command -v airflow) webserver
