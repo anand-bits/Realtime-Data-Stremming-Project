@@ -48,9 +48,3 @@ This project focuses on building a real-time data streaming pipeline. The goal i
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any changes.
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contact
-For any questions or feedback, please contact [your email](mailto:youremail@example.com).
